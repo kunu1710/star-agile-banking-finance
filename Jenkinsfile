@@ -35,7 +35,7 @@ pipeline{
          }
         stage('Run the container with port mapping'){
             steps{
-                sh 'docker run -dt -p 8091:8091 --name c01 bankimage'
+                sh 'docker run -dt -p 8081:8081 --name c01 bankimage'
             }
         }   
     }
