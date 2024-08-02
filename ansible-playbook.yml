@@ -1,15 +1,34 @@
-- name : Configure Docker on EC2 Instances
-  hosts : all
+- name: Configure Docker on EC2 Instances
+  hosts: all
   become: true
-  connection : ssh
-  tasks : 
-  - name: updating apt
-    command : sudo apt-get update
+  tasks:
+    - name: Update yum repositories
+      yum:
+        name: '*'
+        state: latest
 
-  - name : Install Docker
-    command : sudo apt-get install -y docker.io
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
 
-  - name : Start Docker Service
-    command : sudo systemctl start docker
+    - name: Start Docker Service
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
- 
+    - name: Pull Docker Image
+      docker_image:
+        name: sumith596/financeme
+        tag: latest
+        source: pull
+
+    - name: Run Docker Container
+      docker_container:
+        name: financeapp_new
+        image: sumith596/financeme:latest
+        state: started
+        ports:
+          - "8081:8081"
+
