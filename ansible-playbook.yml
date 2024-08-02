@@ -2,14 +2,14 @@
   hosts: all
   become: true
   tasks:
-    - name: Update yum repositories
-      yum:
+    - name: Update apt repositories
+      apt:
         name: '*'
         state: latest
 
     - name: Install Docker
-      yum:
-        name: docker
+      apt:
+        name: docker.io
         state: present
 
     - name: Start Docker Service
