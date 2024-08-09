@@ -30,5 +30,5 @@
         image: sumith596/financeme:latest
         state: started
         ports:
-          - "8081:8081"
+          - "8083:8081"
 
