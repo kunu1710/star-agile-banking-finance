@@ -1,68 +1,53 @@
 pipeline {
     agent any
-    environment {
-        DOCKERHUB_CREDENTIALS = 'dockerhub-pwd'
-        SSH_CREDENTIALS_ID = 'ansible-ssh-key'
-        ECR_REGION = 'ap-south-1'
-    }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout Code from GitHub') {
             steps {
-                git 'https://github.com/sumeeth07/star-agile-banking-finance.git'
+                git url: 'https://github.com/sumeeth07/star-agile-banking-finance.git'
+                echo 'GitHub URL checked out'
             }
         }
-        stage('Build') {
+        stage('Compile Code') {
             steps {
-                sh 'mvn clean package'
+                echo 'Starting compilation'
+                sh 'mvn compile'
             }
         }
-        stage('Docker Build') {
+        stage('Run Tests') {
             steps {
-                script {
-                    sh 'docker images'
-                    docker.build('sumith596/financeme:latest')
-                    sh 'docker images'
-                }
+                sh 'mvn test'
             }
         }
-        stage('Docker Push') {
+        stage('QA Check') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS) {
-                        docker.image('sumith596/financeme').push('latest')
+                sh 'mvn checkstyle:checkstyle'
+            }
+        }
+        stage('Package') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t sumith596/finance:latest .'
+                sh 'docker run -itd -p 8083:8081 sumith596/financeme:latest'
+            }
+        }
+        stage('Log in to DockerHub and push the image to dockerhub') {
+            steps{
+                withCredentials([string(credentialsId: 'dockerhubpass', variable: 'dockerhubpass')]) {
+                sh 'docker login -u sumith596 -p ${dockerhubpass}'
+                sh 'docker push sumith596/financeme:latest'
                     }
-                }
             }
         }
-        stage('Run the container with port mapping') {
+        stage('Deployment stage using ansible') {
             steps {
-                sh '''
-        if [ "$(docker ps -q -f name=financeapp_new)" ]; then
-            docker stop financeapp_new
-            docker rm financeapp_new
-        fi
-        docker run -dt -p 8081:8081 --name financeapp_new sumith596/financeme:latest
-        '''
+                ansiblePlaybook become: true, credentialsId: 'ansible', disableHostKeyChecking: true, installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: 'ansible-playbook.yml', sudoUser: null, vaultTmpPath: ''
             }
-        }
-        stage('Deploy with Ansible') {
-            steps {
-                withCredentials([sshUserPrivateKey(credentialsId: SSH_CREDENTIALS_ID, keyFileVariable: 'SSH_KEY')]) {
-                    ansiblePlaybook(
-                        playbook: 'ansible-playbook.yml',
-                        inventory: 'hosts',
-                        extras: '--key-file=${SSH_KEY}'
-                    )
-                }
-            }
-        }
-    }
-    post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline execution failed!'
         }
     }
 }
+    
