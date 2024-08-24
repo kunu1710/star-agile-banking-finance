@@ -32,7 +32,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t suvakantanayak/banking:latest .'
-                sh 'docker run -itd -p 8081:8081 suvakantanayak/banking:latest'
+                sh 'docker run -itd -p 8082:8081 suvakantanayak/banking:latest'
             }
         }
         stage('Log in to DockerHub and push the image to dockerhub') {
