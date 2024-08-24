@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code from GitHub') {
             steps {
-                git url: 'https://github.com/sumeeth07/star-agile-banking-finance.git'
+                git url: 'https://github.com/kunu1710/star-agile-banking-finance.git'
                 echo 'GitHub URL checked out'
             }
         }
@@ -31,15 +31,15 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t sumith596/finance:latest .'
-                sh 'docker run -itd -p 8083:8081 sumith596/financeme:latest'
+                sh 'docker build -t suvakantanayak/banking:latest .'
+                sh 'docker run -itd -p 8081:8081 suvakantanayak/banking:latest'
             }
         }
         stage('Log in to DockerHub and push the image to dockerhub') {
             steps{
                 withCredentials([string(credentialsId: 'dockerhubpass', variable: 'dockerhubpass')]) {
-                sh 'docker login -u sumith596 -p ${dockerhubpass}'
-                sh 'docker push sumith596/financeme:latest'
+                sh 'docker login -u suvakantanayak -p ${dockerhubpass}'
+                sh 'docker push suvakantanayak/banking:latest'
                     }
             }
         }
