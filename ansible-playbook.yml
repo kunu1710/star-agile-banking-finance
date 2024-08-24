@@ -27,8 +27,8 @@
     - name: Run Docker Container
       docker_container:
         name: financeapp_new
-        image: suvakantanaya/banking:latest
+        image: suvakantanayak/banking:latest
         state: started
         ports:
-          - "8081:8081"
+          - "8082:8081"
 
