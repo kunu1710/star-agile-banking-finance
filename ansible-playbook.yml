@@ -20,15 +20,15 @@
 
     - name: Pull Docker Image
       docker_image:
-        name: sumith596/financeme
+        name: suvakantanayak/banking
         tag: latest
         source: pull
 
     - name: Run Docker Container
       docker_container:
         name: financeapp_new
-        image: sumith596/financeme:latest
+        image: suvakantanaya/banking:latest
         state: started
         ports:
-          - "8083:8081"
+          - "8081:8081"
 
